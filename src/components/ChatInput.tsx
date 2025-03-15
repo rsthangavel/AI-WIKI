@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { PaperPlaneIcon, MicIcon, ImageIcon, PlusIcon } from "lucide-react";
+import { Send, Mic, Image, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface ChatInputProps {
@@ -62,7 +62,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             onClick={() => {}}
             disabled={isWaitingForResponse}
           >
-            <PlusIcon className="h-5 w-5" />
+            <Plus className="h-5 w-5" />
           </Button>
           
           <div className="relative flex-grow">
@@ -85,7 +85,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 className="h-8 w-8 rounded-full hover:bg-secondary transition-all duration-200"
                 disabled={isWaitingForResponse}
               >
-                <ImageIcon className="h-4 w-4" />
+                <Image className="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
@@ -94,7 +94,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 className="h-8 w-8 rounded-full hover:bg-secondary transition-all duration-200"
                 disabled={isWaitingForResponse}
               >
-                <MicIcon className="h-4 w-4" />
+                <Mic className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -107,7 +107,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             disabled={!message.trim() || isWaitingForResponse}
             onClick={handleSend}
           >
-            <PaperPlaneIcon className="h-4 w-4" />
+            <Send className="h-4 w-4" />
           </Button>
         </div>
       </div>
