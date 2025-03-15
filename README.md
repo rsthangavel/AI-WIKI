@@ -7,7 +7,7 @@ This is a full-stack AI chat application with a React frontend, Node.js/Express 
 
 - Frontend: React with Vite, Ant Design, and Tailwind CSS
 - Backend: Node.js with Express and TypeScript
-- AI Agent: Python with Flask, phidata, and Groq LLM
+- AI Agent: Python with Flask, phidata, and DeepSeek LLM
 
 ## Setup Instructions
 
@@ -34,9 +34,9 @@ npm install
 pip install flask flask-cors phidata google-api-python-client
 ```
 
-4. Add your Groq API key to the `.env` file:
+4. Add your DeepSeek API key to the `.env` file:
 ```
-GROQ_API_KEY=your-api-key-here
+DEEPSEEK_API_KEY=your-api-key-here
 ```
 
 5. (Optional) Add YouTube API key for YouTube search functionality:
@@ -78,4 +78,4 @@ You can ask questions about YouTube videos in natural language, such as:
 - "Show me popular cooking channels"
 - "Find videos related to space exploration"
 
-The AI will use the Groq LLM to enhance responses and provide YouTube video recommendations.
+The AI will use the DeepSeek LLM to enhance responses and provide YouTube video recommendations.

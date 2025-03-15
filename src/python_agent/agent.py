@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
@@ -9,14 +8,14 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import phidata as phi
 from phi.assistant import Assistant
-from phi.llm.groq import GroqLLM
+from phi.llm.deepseek import DeepSeekLLM
 
 app = Flask(__name__)
 CORS(app)
 
-# Initialize Groq LLM with API key
-api_key = os.environ.get("GROQ_API_KEY")
-llm = GroqLLM(model="llama3-70b-8192", api_key=api_key)
+# Initialize DeepSeek LLM with API key
+api_key = os.environ.get("DEEPSEEK_API_KEY")
+llm = DeepSeekLLM(model="deepseek-coder", api_key=api_key)
 
 # Initialize YouTube API
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
