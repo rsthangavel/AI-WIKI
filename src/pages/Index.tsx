@@ -14,6 +14,12 @@ type Message = {
   timestamp: string;
   fileUrl?: string;
   fileType?: string;
+  videos?: {
+    title: string;
+    url: string;
+    thumbnail: string;
+    channel: string;
+  }[];
 };
 
 const Index = () => {
@@ -75,7 +81,8 @@ const Index = () => {
           minute: '2-digit' 
         }),
         fileUrl: response.file?.url,
-        fileType: response.file?.type
+        fileType: response.file?.type,
+        videos: response.type === "youtube_results" ? response.videos : undefined
       };
       
       setMessages((prevMessages) => [...prevMessages, assistantMessage]);
@@ -148,6 +155,7 @@ const Index = () => {
                     index={index}
                     fileUrl={message.fileUrl}
                     fileType={message.fileType}
+                    videos={message.videos}
                   />
                 ))}
                 

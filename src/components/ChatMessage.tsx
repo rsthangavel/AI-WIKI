@@ -8,6 +8,13 @@ import { cn } from "@/lib/utils";
 
 export type MessageRole = "user" | "assistant";
 
+interface YouTubeVideo {
+  title: string;
+  url: string;
+  thumbnail: string;
+  channel: string;
+}
+
 interface ChatMessageProps {
   role: MessageRole;
   content: string;
@@ -17,6 +24,7 @@ interface ChatMessageProps {
   index: number;
   fileUrl?: string;
   fileType?: string;
+  videos?: YouTubeVideo[];
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -28,6 +36,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   index,
   fileUrl,
   fileType,
+  videos,
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -96,6 +105,40 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     }
   };
 
+  // Helper function to render YouTube videos
+  const renderYouTubeVideos = () => {
+    if (!videos || videos.length === 0) return null;
+
+    return (
+      <div className="mt-4 space-y-4">
+        <h3 className="text-sm font-medium">YouTube Results:</h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {videos.map((video, idx) => (
+            <a 
+              key={idx} 
+              href={video.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md"
+            >
+              <div className="aspect-video w-full overflow-hidden">
+                <img 
+                  src={video.thumbnail} 
+                  alt={video.title}
+                  className="h-full w-full object-cover" 
+                />
+              </div>
+              <div className="p-3">
+                <h4 className="line-clamp-2 text-sm font-medium">{video.title}</h4>
+                <p className="mt-1 text-xs text-muted-foreground">{video.channel}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <motion.div
       className={cn(
@@ -134,6 +177,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           {/* Render file attachment if present */}
           {renderFileAttachment()}
         </div>
+        
+        {/* Render YouTube videos if present */}
+        {!isUser && renderYouTubeVideos()}
         
         {timestamp && (
           <div className="text-xs text-muted-foreground">
