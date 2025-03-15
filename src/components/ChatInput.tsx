@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect } from "react";
+import { Input, Button as AntButton } from "antd";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Send, Mic, Image, Plus } from "lucide-react";
+import { SendOutlined, AudioOutlined, PictureOutlined, PlusOutlined } from "@ant-design/icons";
 import { motion } from "framer-motion";
 
 interface ChatInputProps {
@@ -10,12 +10,14 @@ interface ChatInputProps {
   isWaitingForResponse?: boolean;
 }
 
+const { TextArea } = Input;
+
 const ChatInput: React.FC<ChatInputProps> = ({
   onSendMessage,
   isWaitingForResponse = false,
 }) => {
   const [message, setMessage] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<any>(null);
 
   const handleSend = () => {
     if (message.trim() && !isWaitingForResponse) {
@@ -23,7 +25,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       setMessage("");
       // Reset textarea height
       if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
+        textareaRef.current.resizableTextArea.textArea.style.height = "auto";
       }
     }
   };
@@ -35,17 +37,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  // Auto-resize textarea
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(
-        textareaRef.current.scrollHeight,
-        200
-      )}px`;
-    }
-  }, [message]);
-
   return (
     <motion.div 
       className="px-4 py-4 border-t bg-background/80 backdrop-blur-md sticky bottom-0 z-10"
@@ -55,60 +46,58 @@ const ChatInput: React.FC<ChatInputProps> = ({
     >
       <div className="max-w-4xl mx-auto">
         <div className="relative flex items-end space-x-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full flex-shrink-0 hover:bg-secondary transition-all duration-200"
+          <AntButton
+            type="text"
+            shape="circle"
+            icon={<PlusOutlined />}
+            className="flex-shrink-0 hover:bg-secondary transition-all duration-200"
             onClick={() => {}}
             disabled={isWaitingForResponse}
-          >
-            <Plus className="h-5 w-5" />
-          </Button>
+          />
           
           <div className="relative flex-grow">
-            <Textarea
+            <TextArea
               ref={textareaRef}
               placeholder="Message Lovable..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isWaitingForResponse}
-              className="resize-none pr-14 pl-4 py-3 max-h-[200px] rounded-full border focus-visible:ring-1 focus-visible:ring-primary bg-background"
-              rows={1}
+              autoSize={{ minRows: 1, maxRows: 4 }}
+              className="resize-none pr-14 pl-4 py-3 max-h-[200px] rounded-full border bg-background"
+              style={{ borderRadius: '24px' }}
             />
             
             <div className="absolute right-2 bottom-2 flex space-x-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                type="button"
-                className="h-8 w-8 rounded-full hover:bg-secondary transition-all duration-200"
+              <AntButton
+                type="text"
+                shape="circle"
+                size="small"
+                icon={<PictureOutlined />}
+                className="h-8 w-8 hover:bg-secondary transition-all duration-200"
                 disabled={isWaitingForResponse}
-              >
-                <Image className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                type="button"
-                className="h-8 w-8 rounded-full hover:bg-secondary transition-all duration-200"
+              />
+              <AntButton
+                type="text"
+                shape="circle"
+                size="small"
+                icon={<AudioOutlined />}
+                className="h-8 w-8 hover:bg-secondary transition-all duration-200"
                 disabled={isWaitingForResponse}
-              >
-                <Mic className="h-4 w-4" />
-              </Button>
+              />
             </div>
           </div>
           
-          <Button
-            className={`rounded-full flex-shrink-0 transition-all duration-300 ${
+          <AntButton
+            type="primary"
+            shape="circle"
+            icon={<SendOutlined />}
+            className={`transition-all duration-300 ${
               !message.trim() ? "opacity-70" : "opacity-100"
             }`}
-            size="icon"
             disabled={!message.trim() || isWaitingForResponse}
             onClick={handleSend}
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+          />
         </div>
       </div>
     </motion.div>

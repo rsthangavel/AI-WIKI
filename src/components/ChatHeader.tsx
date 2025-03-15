@@ -2,8 +2,10 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { SettingsIcon, InfoIcon, ArrowLeftIcon } from "lucide-react";
+import { SettingOutlined, InfoCircleOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { Button as AntButton } from "antd";
 import AIAvatar from "./AIAvatar";
+import ThemeToggle from "./ThemeToggle";
 
 interface ChatHeaderProps {
   onBack?: () => void;
@@ -24,14 +26,12 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       <div className="max-w-4xl mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-3">
           {showBackButton && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full"
+            <AntButton
+              type="text"
+              shape="circle"
+              icon={<ArrowLeftOutlined />}
               onClick={onBack}
-            >
-              <ArrowLeftIcon className="h-5 w-5" />
-            </Button>
+            />
           )}
           <AIAvatar size="sm" />
           <div>
@@ -40,21 +40,20 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           </div>
         </div>
         
-        <div className="flex items-center space-x-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full flex-shrink-0 hover:bg-secondary transition-all duration-200"
-          >
-            <InfoIcon className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full flex-shrink-0 hover:bg-secondary transition-all duration-200"
-          >
-            <SettingsIcon className="h-5 w-5" />
-          </Button>
+        <div className="flex items-center space-x-3">
+          <ThemeToggle />
+          <AntButton
+            type="text"
+            shape="circle"
+            icon={<InfoCircleOutlined />}
+            className="flex-shrink-0 hover:bg-secondary transition-all duration-200"
+          />
+          <AntButton
+            type="text"
+            shape="circle"
+            icon={<SettingOutlined />}
+            className="flex-shrink-0 hover:bg-secondary transition-all duration-200"
+          />
         </div>
       </div>
     </motion.div>

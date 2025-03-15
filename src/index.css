@@ -92,6 +92,10 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', sans-serif;
@@ -145,4 +149,39 @@
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
   }
+
+  /* Smooth scrolling */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
 }
+
+/* Ant Design customization for theme compatibility */
+.ant-btn-primary {
+  background-color: hsl(var(--primary));
+}
+
+.ant-switch-checked {
+  background-color: hsl(var(--primary));
+}
+
+body.dark .ant-btn-primary {
+  background-color: hsl(var(--primary));
+}
+
+body.dark .ant-input,
+body.dark .ant-input-affix-wrapper,
+body.dark .ant-textarea {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+
+body.dark .ant-btn-default {
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+

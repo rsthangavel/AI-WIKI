@@ -17,6 +17,7 @@ const Index = () => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -82,7 +83,8 @@ const Index = () => {
           <WelcomeScreen onStartChat={handleStartChat} key="welcome" />
         ) : (
           <motion.div 
-            className="flex-1 overflow-y-auto"
+            ref={chatContainerRef}
+            className="flex-1 overflow-y-auto smooth-scroll"
             key="chat"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
