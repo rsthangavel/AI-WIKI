@@ -5,11 +5,15 @@ import ChatInput from "@/components/ChatInput";
 import ChatMessage from "@/components/ChatMessage";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import { motion, AnimatePresence } from "framer-motion";
+import { sendQuery, uploadFile } from "@/utils/api";
+import { message } from "antd";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
   timestamp: string;
+  fileUrl?: string;
+  fileType?: string;
 };
 
 const Index = () => {
@@ -27,7 +31,24 @@ const Index = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (content: string, file?: File) => {
+    let fileUrl: string | undefined;
+    let fileType: string | undefined;
+
+    // First handle file upload if there is one
+    if (file) {
+      try {
+        setIsWaitingForResponse(true);
+        const uploadResponse = await uploadFile(file);
+        fileUrl = uploadResponse.file.url;
+        fileType = uploadResponse.file.type;
+      } catch (error) {
+        message.error("Failed to upload file");
+        setIsWaitingForResponse(false);
+        return;
+      }
+    }
+
     const userMessage = {
       role: "user" as const,
       content,
@@ -35,14 +56,33 @@ const Index = () => {
         hour: '2-digit', 
         minute: '2-digit' 
       }),
+      fileUrl,
+      fileType
     };
     
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setIsWaitingForResponse(true);
     
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Call the AI service
+      const response = await sendQuery(content);
+      
       const assistantMessage = {
+        role: "assistant" as const,
+        content: response.text || "Sorry, I couldn't process your request.",
+        timestamp: new Date().toLocaleTimeString([], { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        fileUrl: response.file?.url,
+        fileType: response.file?.type
+      };
+      
+      setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+    } catch (error) {
+      // Fallback to mock response if API is not available
+      console.error("Failed to get AI response, using fallback:", error);
+      const fallbackMessage = {
         role: "assistant" as const,
         content: getAIResponse(content),
         timestamp: new Date().toLocaleTimeString([], { 
@@ -51,9 +91,11 @@ const Index = () => {
         }),
       };
       
-      setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+      setMessages((prevMessages) => [...prevMessages, fallbackMessage]);
+      message.warning("Using fallback response as backend is not available");
+    } finally {
       setIsWaitingForResponse(false);
-    }, 1500);
+    }
   };
 
   const getAIResponse = (message: string): string => {
@@ -104,6 +146,8 @@ const Index = () => {
                     content={message.content}
                     timestamp={message.timestamp}
                     index={index}
+                    fileUrl={message.fileUrl}
+                    fileType={message.fileType}
                   />
                 ))}
                 
