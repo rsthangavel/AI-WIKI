@@ -15,6 +15,8 @@ interface ChatMessageProps {
   isLoading?: boolean;
   showTypingIndicator?: boolean;
   index: number;
+  fileUrl?: string;
+  fileType?: string;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -24,6 +26,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   isLoading = false,
   showTypingIndicator = false,
   index,
+  fileUrl,
+  fileType,
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -45,6 +49,51 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     await navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Helper function to render file attachments
+  const renderFileAttachment = () => {
+    if (!fileUrl || !fileType) return null;
+
+    if (fileType.startsWith('image/')) {
+      return (
+        <div className="mt-2 rounded-md overflow-hidden">
+          <img src={fileUrl} alt="Uploaded image" className="max-w-full max-h-[300px] object-contain" />
+        </div>
+      );
+    } else if (fileType.startsWith('video/')) {
+      return (
+        <div className="mt-2 rounded-md overflow-hidden">
+          <video controls className="max-w-full max-h-[300px]">
+            <source src={fileUrl} type={fileType} />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      );
+    } else if (fileType.startsWith('audio/')) {
+      return (
+        <div className="mt-2">
+          <audio controls className="w-full">
+            <source src={fileUrl} type={fileType} />
+            Your browser does not support the audio tag.
+          </audio>
+        </div>
+      );
+    } else {
+      // For other file types, show a download link
+      return (
+        <div className="mt-2">
+          <a 
+            href={fileUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-primary underline flex items-center gap-2"
+          >
+            <span>Download attachment</span>
+          </a>
+        </div>
+      );
+    }
   };
 
   return (
@@ -81,6 +130,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           ) : (
             <div className="whitespace-pre-wrap">{content}</div>
           )}
+          
+          {/* Render file attachment if present */}
+          {renderFileAttachment()}
         </div>
         
         {timestamp && (
