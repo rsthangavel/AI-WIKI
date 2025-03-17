@@ -9,14 +9,18 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import phidata as phi
 from phi.assistant import Assistant
-from phi.llm.deepseek import DeepSeekLLM
+from phi.llm.groq import GroqLLM
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-# Initialize DeepSeek LLM with API key
-api_key = os.environ.get("DEEPSEEK_API_KEY")
-llm = DeepSeekLLM(model="deepseek-coder", api_key=api_key)
+# Initialize Groq LLM with API key
+api_key = os.environ.get("GROQ_API_KEY")
+llm = GroqLLM(model="mixtral-8x7b-32768", api_key=api_key)
 
 # Initialize YouTube API
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
@@ -24,7 +28,7 @@ youtube = None
 if YOUTUBE_API_KEY:
     youtube = build('youtube', 'v3', developerKey=YOUTUBE_API_KEY)
 
-# Create a phidata assistant
+# Create a phidata assistant with YouTube capabilities
 assistant = Assistant(
     llm=llm,
     name="YouTube Expert",
