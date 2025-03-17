@@ -5,9 +5,9 @@ This is a full-stack AI chat application with a React frontend, Node.js/Express 
 
 ## Project Structure
 
-- Frontend: React with Vite, Ant Design, and Tailwind CSS
-- Backend: Node.js with Express and TypeScript
-- AI Agent: Python with Flask, phidata, and DeepSeek LLM
+- `./` - Frontend: React with Vite, Ant Design, and Tailwind CSS
+- `./backend/` - Backend: Node.js with Express and TypeScript
+- `./python-agent/` - AI Agent: Python with Flask, phidata, and DeepSeek LLM
 
 ## Setup Instructions
 
@@ -17,29 +17,51 @@ This is a full-stack AI chat application with a React frontend, Node.js/Express 
 - Python (v3.8 or higher)
 - npm or yarn
 
-### Environment Setup
+### Frontend Setup
 
-1. Create a `.env` file based on `.env.example`:
-```
-cp .env.example .env
-```
-
-2. Install frontend dependencies:
+1. Install dependencies in the root directory:
 ```
 npm install
 ```
 
-3. Install Python dependencies:
+2. Create a `.env` file based on `.env.example` in the root directory.
+
+### Backend Setup
+
+1. Navigate to the backend directory and install dependencies:
 ```
-pip install flask flask-cors phidata google-api-python-client
+cd backend
+npm install
 ```
 
-4. Add your DeepSeek API key to the `.env` file:
+2. Create a `.env` file based on `.env.example` in the backend directory.
+
+### Python Agent Setup
+
+1. Navigate to the python-agent directory:
+```
+cd python-agent
+```
+
+2. Create a virtual environment (recommended):
+```
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install Python dependencies:
+```
+pip install -r requirements.txt
+```
+
+4. Create a `.env` file based on `.env.example` in the python-agent directory.
+
+5. Add your DeepSeek API key to the `.env` file:
 ```
 DEEPSEEK_API_KEY=your-api-key-here
 ```
 
-5. (Optional) Add YouTube API key for YouTube search functionality:
+6. (Optional) Add YouTube API key for YouTube search functionality:
 ```
 YOUTUBE_API_KEY=your-youtube-api-key-here
 ```
@@ -48,13 +70,14 @@ YOUTUBE_API_KEY=your-youtube-api-key-here
 
 1. Start the Python AI agent:
 ```
-cd src/python_agent
+cd python-agent
 python agent.py
 ```
 
 2. Start the Express backend (in a new terminal):
 ```
-npm run server
+cd backend
+npm run dev
 ```
 
 3. Start the React frontend (in a new terminal):
