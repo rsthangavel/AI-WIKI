@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import UserAvatar from "./UserAvatar";
@@ -139,6 +138,22 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
+  // Function to format text with bold markdown
+  const formatText = (text: string) => {
+    // Split by bold markdown pattern
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    
+    return parts.map((part, i) => {
+      // Check if this part is a bold pattern
+      if (part.startsWith('**') && part.endsWith('**')) {
+        // Remove the asterisks and wrap in <strong> tag
+        return <strong key={i}>{part.slice(2, -2)}</strong>;
+      }
+      // Return regular text
+      return <span key={i}>{part}</span>;
+    });
+  };
+
   return (
     <motion.div
       className={cn(
@@ -171,7 +186,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               <span className="typing-indicator" style={{ animationDelay: "0.4s" }}></span>
             </div>
           ) : (
-            <div className="whitespace-pre-wrap">{content}</div>
+            <div className="whitespace-pre-wrap">
+              {formatText(content)}
+            </div>
           )}
           
           {/* Render file attachment if present */}
