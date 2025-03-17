@@ -10,6 +10,7 @@ from googleapiclient.errors import HttpError
 import phidata as phi
 from phi.assistant import Assistant
 from phi.llm.groq import GroqLLM
+from phi.tools.youtube import YoutubeSearchTool
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -24,15 +25,19 @@ llm = GroqLLM(model="mixtral-8x7b-32768", api_key=api_key)
 
 # Initialize YouTube API
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
-youtube = None
+youtube_tool = None
 if YOUTUBE_API_KEY:
-    youtube = build('youtube', 'v3', developerKey=YOUTUBE_API_KEY)
+    youtube_tool = YoutubeSearchTool(
+        api_key=YOUTUBE_API_KEY, 
+        num_results=5
+    )
 
-# Create a phidata assistant with YouTube capabilities
+# Create a phidata assistant with YouTube capabilities using the phi.assistant approach
 assistant = Assistant(
     llm=llm,
     name="YouTube Expert",
-    description="I am an AI assistant specialized in providing information about YouTube videos, channels, and trends."
+    description="I am an AI assistant specialized in providing information about YouTube videos, channels, and trends.",
+    tools=[youtube_tool] if youtube_tool else []
 )
 
 def extract_youtube_query(text: str) -> Optional[str]:
@@ -50,37 +55,6 @@ def extract_youtube_query(text: str) -> Optional[str]:
     
     return None
 
-def search_youtube_videos(query: str, max_results: int = 5) -> List[Dict[str, Any]]:
-    """Search YouTube for videos matching the query."""
-    if not youtube or not YOUTUBE_API_KEY:
-        return [{"title": "YouTube API key not configured", "url": "", "thumbnail": "", "channel": ""}]
-    
-    try:
-        search_response = youtube.search().list(
-            q=query,
-            part='snippet',
-            maxResults=max_results,
-            type='video'
-        ).execute()
-        
-        videos = []
-        for item in search_response.get('items', []):
-            video_id = item['id']['videoId']
-            video_url = f"https://www.youtube.com/watch?v={video_id}"
-            thumbnail = item['snippet']['thumbnails']['medium']['url']
-            
-            videos.append({
-                "title": item['snippet']['title'],
-                "url": video_url,
-                "thumbnail": thumbnail,
-                "channel": item['snippet']['channelTitle']
-            })
-        
-        return videos
-    except HttpError as e:
-        print(f"An HTTP error occurred: {e}")
-        return []
-
 @app.route('/api/agent', methods=['POST'])
 def process_query():
     data = request.json
@@ -89,27 +63,34 @@ def process_query():
     # Check if query is YouTube-related
     youtube_query = extract_youtube_query(query)
     
-    if youtube_query:
-        # Search for YouTube videos
-        videos = search_youtube_videos(youtube_query)
+    if youtube_query and youtube_tool:
+        # Use the assistant with YouTube tool
+        response = assistant.run(
+            f"Find YouTube videos about: {youtube_query}"
+        )
         
-        if videos:
-            # Format response with video information
-            text_response = f"Here are some YouTube videos about '{youtube_query}':\n\n"
-            for i, video in enumerate(videos, 1):
-                text_response += f"{i}. {video['title']} by {video['channel']}\n   {video['url']}\n\n"
+        # Try to extract video data from the response
+        try:
+            # The assistant may return structured data about videos
+            videos = youtube_tool.get_last_search_results()
+            formatted_videos = []
             
-            # Use assistant to enhance the response
-            enhanced_response = assistant.run(
-                f"The user asked about YouTube videos on '{youtube_query}'. Here are the results: {text_response} " +
-                "Please provide a helpful, concise summary of these results and any additional context that might be useful."
-            )
-            
-            return jsonify({
-                "text": enhanced_response,
-                "type": "youtube_results",
-                "videos": videos
-            })
+            if videos:
+                for video in videos:
+                    formatted_videos.append({
+                        "title": video.get("title", ""),
+                        "url": f"https://www.youtube.com/watch?v={video.get('id', {}).get('videoId', '')}",
+                        "thumbnail": video.get("snippet", {}).get("thumbnails", {}).get("medium", {}).get("url", ""),
+                        "channel": video.get("snippet", {}).get("channelTitle", "")
+                    })
+                
+                return jsonify({
+                    "text": response,
+                    "type": "youtube_results",
+                    "videos": formatted_videos
+                })
+        except Exception as e:
+            print(f"Error processing YouTube results: {e}")
     
     # For non-YouTube queries or if YouTube search fails, use the assistant
     response = assistant.run(query)
