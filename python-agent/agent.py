@@ -5,12 +5,9 @@ import os
 import json
 from typing import Dict, Any, List, Optional
 import re
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-import phidata as phi
-from phi.assistant import Assistant
-from phi.llm.groq import GroqLLM
-from phi.tools.youtube import YoutubeSearchTool
+from phi.agent import Agent, RunResponse
+from phi.model.groq import Groq
+from phi.tools.wikipedia import WikipediaTools
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -18,27 +15,18 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
-
 # Initialize Groq LLM with API key
 api_key = os.environ.get("GROQ_API_KEY")
-llm = GroqLLM(model="mixtral-8x7b-32768", api_key=api_key)
 
 # Initialize YouTube API
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
 youtube_tool = None
-if YOUTUBE_API_KEY:
-    youtube_tool = YoutubeSearchTool(
-        api_key=YOUTUBE_API_KEY, 
-        num_results=5
-    )
 
 # Create a phidata assistant with YouTube capabilities using the phi.assistant approach
-assistant = Assistant(
-    llm=llm,
-    name="YouTube Expert",
-    description="I am an AI assistant specialized in providing information about YouTube videos, channels, and trends.",
-    tools=[youtube_tool] if youtube_tool else []
-)
+agent = Agent(
+    tools=[WikipediaTools()], 
+    model=Groq(id="deepseek-r1-distill-llama-70b"),
+    show_tool_calls=True)
 
 def extract_youtube_query(text: str) -> Optional[str]:
     """Extract YouTube-related query from user input."""
@@ -60,43 +48,46 @@ def process_query():
     data = request.json
     query = data.get('query', '')
     
-    # Check if query is YouTube-related
-    youtube_query = extract_youtube_query(query)
-    
-    if youtube_query and youtube_tool:
-        # Use the assistant with YouTube tool
-        response = assistant.run(
-            f"Find YouTube videos about: {youtube_query}"
-        )
+    # # Check if query is YouTube-related
+    # youtube_query = extract_youtube_query(query)
+    # print(f"Extracted YouTube query: {youtube_query}")
+    # if youtube_query and youtube_tool:
+    #     # Use the assistant with YouTube tool
+    #     response = agent.run(
+    #         f"Find YouTube videos about: {youtube_query}"
+    #     )
         
-        # Try to extract video data from the response
-        try:
-            # The assistant may return structured data about videos
-            videos = youtube_tool.get_last_search_results()
-            formatted_videos = []
+    #     # Try to extract video data from the response
+    #     try:
+    #         # The assistant may return structured data about videos
+    #         videos = youtube_tool.get_last_search_results()
+    #         formatted_videos = []
             
-            if videos:
-                for video in videos:
-                    formatted_videos.append({
-                        "title": video.get("title", ""),
-                        "url": f"https://www.youtube.com/watch?v={video.get('id', {}).get('videoId', '')}",
-                        "thumbnail": video.get("snippet", {}).get("thumbnails", {}).get("medium", {}).get("url", ""),
-                        "channel": video.get("snippet", {}).get("channelTitle", "")
-                    })
+    #         if videos:
+    #             for video in videos:
+    #                 formatted_videos.append({
+    #                     "title": video.get("title", ""),
+    #                     "url": f"https://www.youtube.com/watch?v={video.get('id', {}).get('videoId', '')}",
+    #                     "thumbnail": video.get("snippet", {}).get("thumbnails", {}).get("medium", {}).get("url", ""),
+    #                     "channel": video.get("snippet", {}).get("channelTitle", "")
+    #                 })
                 
-                return jsonify({
-                    "text": response,
-                    "type": "youtube_results",
-                    "videos": formatted_videos
-                })
-        except Exception as e:
-            print(f"Error processing YouTube results: {e}")
+    #             return jsonify({
+    #                 "text": response,
+    #                 "type": "youtube_results",
+    #                 "videos": formatted_videos
+    #             })
+    #     except Exception as e:
+    #         print(f"Error processing YouTube results: {e}")
     
     # For non-YouTube queries or if YouTube search fails, use the assistant
-    response = assistant.run(query)
-    
+    # response: RunResponse = agent.run(query)
+    response = agent.run(
+            f"Search wikipedia for: {query}"
+        )
+    print(f"Assistant response: {response.content}")
     return jsonify({
-        "text": response,
+        "text": response.content,
         "type": "text"
     })
 
